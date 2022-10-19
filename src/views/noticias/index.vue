@@ -1,179 +1,219 @@
-<template lang="html">
+<template>
+  <div>
+    <div class="mb-8">
+      <div class="flex justify-between">
+        <h3 class="text-3xl font-medium text-gray-700">Listado de noticias</h3>
+        <router-link to="/agregar-nueva-noticia" class="btn btn-blue">Agregar nueva noticia <i class="fa fa-plus"></i></router-link>
+      </div>
+    </div>
 
-  <section class="tables">
-    <div class="row">
-      <div class="col-lg-12 grid-margin stretch-card">
-        <div class="card">
-          <div class="card-body">
-            <b-badge v-if="this.$route.query.mensaje == 'actualizada'" variant="success mb-3">Noticia actualizada correctamente</b-badge>
-            <h4 class="card-title">Listado de Noticias</h4>
-            <p class="card-description">
-              Para registrar una nueva noticia, ingrese <router-link to="/noticias/registrar">aquí</router-link>
-            </p>
-            <div class="table-responsive">
-              <table class="table b-table table-striped table-hover">
-                  <thead>
-                      <tr>
-                          <th>ID</th>
-                          <th>Título</th>
-                          <th>Página</th>
-                          <th>Destacado</th>
-                          <th>Acciones</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                      <tr v-for="item in items" :key="item.id">
-                          <td>{{item.id}}</td>
-                          <td class="ellipsis--tr">{{item.titulo}}</td>
-                          <td class="ellipsis--tr" v-if="item.pagina != null">{{item.pagina.nombre}}</td>
-                          <td class="ellipsis--tr" v-else></td>
-                          <td>{{item.destacado}}</td>
-                          <td>
-                            <div class="icon-div"><router-link :to="{ name: 'editarNoticia', params: { idnot: item.id }}"><i title="Editar" class="mdi mdi-grease-pencil"></i></router-link></div>
-                            <div v-bind:id="'accion_desactivar_' + item.id" v-if="item.activo == 0" class="icon-div cursor-pointer" v-on:click="cambiarEstadoNoticia(item.id, 1)"><i title="Activar" class="mdi mdi-checkbox-marked-circle"></i></div>
-                            <div v-bind:id="'accion_activar_' + item.id" v-if="item.activo == 1" class="icon-div cursor-pointer" v-on:click="cambiarEstadoNoticia(item.id, 0)"><i title="Desactivar" class="mdi mdi-cancel"></i></div>
-                            <div class="icon-div cursor-pointer" v-on:click="eliminarNoticia(item.id)"><i title="Eliminar" class="mdi mdi-delete-forever"></i></div>
-                          </td>
-                      </tr>
-                  </tbody>
-              </table>
-            </div>
-          <b-pagination
-        v-model="page"
-        :total-rows="count"
-        :per-page="pageSize"
-        prev-text="Prev"
-        next-text="Next"
-        @change="handlePageChange"
-      ></b-pagination>
-          </div>
+    <div class="flex flex-col mt-8">
+      <div class="py-2 -my-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <div class="inline-block min-w-full overflow-hidden align-middle border-b border-gray-200 shadow sm:rounded-lg">
+          <table class="min-w-full">
+            <thead>
+              <tr>
+                <th class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">ID</th>
+                <th class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">Título</th>
+                <th class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-center text-gray-500 uppercase border-b border-gray-200 bg-gray-50">Tipo de noticia</th>
+                <th class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-center text-gray-500 uppercase border-b border-gray-200 bg-gray-50">Destacada en Home</th>
+                <th class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-center text-gray-500 uppercase border-b border-gray-200 bg-gray-50">Destacada en Noticias</th>
+                <th class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-center text-gray-500 uppercase border-b border-gray-200 bg-gray-50">Acciones</th>
+                <th class="px-6 py-3 border-b border-gray-200 bg-gray-50"></th>
+              </tr>
+            </thead>
+
+            <tbody class="bg-white">
+              <tr v-for="(item, index) in items" :key="index">
+                <td class="px-5 py-3 border-b border-gray-200 whitespace-nowrap">{{ item.id }}</td>
+                <td class="max-w-xs px-5 py-3 truncate border-b border-gray-200 whitespace-nowrap">{{ item.titulo }}</td>
+                <td class="px-5 py-3 text-center border-b border-gray-200 whitespace-nowrap">
+                  <span class="tag">
+                    {{ newType(item.tipo_noticia) }}
+                  </span>
+                </td>
+                <td class="px-5 py-3 text-center border-b border-gray-200 whitespace-nowrap">
+                  <i class="fa fa-check-square check-active" v-if="item.flag_home"></i>
+                </td>
+                <td class="px-5 py-3 text-center text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap">
+                  <i class="fa fa-check-square check-active" v-if="item.destacado"></i>
+                </td>
+                <td class="px-5 py-3 text-sm font-medium leading-5 text-center border-b border-gray-200 whitespace-nowrap">
+                  <router-link :to="`/editar-noticia/idnew/${item.id}`" :key="item.id" class="btn--action">
+                    <i class="fa fa-pen" title="Editar"></i>
+                  </router-link>
+
+                  <button type="button" class="btn--action" v-on:click="eliminarNoticia(item.id)">
+                    <i class="fa fa-trash-alt" title="Eliminar"></i>
+                  </button>
+
+                  <!-- <div v-bind:id="'accion_desactivar_' + item.id" v-if="item.activo == 0" class="cursor-pointer icon-div" v-on:click="cambiarEstadoNoticia(item.id, 1)">
+                    <i title="Activar" class="mdi mdi-checkbox-marked-circle"></i>
+                  </div> -->
+
+                  <!-- <div v-bind:id="'accion_activar_' + item.id" v-if="item.activo == 1" class="cursor-pointer icon-div" v-on:click="cambiarEstadoNoticia(item.id, 0)">
+                    <i title="Desactivar" class="mdi mdi-cancel"></i>
+                  </div> -->
+                </td>
+                <td class="px-5 py-3 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <!-- <b-pagination v-model="page" :total-rows="count" :per-page="pageSize" prev-text="Prev" next-text="Next" @change="handlePageChange"></b-pagination> -->
         </div>
       </div>
     </div>
-  </section>
-
+  </div>
 </template>
 
 <script>
-import axios from 'axios'
-export default {
-  name: 'noticias',
-  data () {
-    return {
-      items: [],
-      currentTutorial: null,
-      currentIndex: -1,
-      searchTitle: '',
-
-      page: 1,
-      count: 0,
-      pageSize: 20,
-
-      pageSizes: [20, 50, 100]
-    }
-  },
-  methods: {
-    eliminarNoticia: function (id, event) {
-      this.$confirm(
-        {
-          message: '¿Está seguro(a) de eliminar el registro?',
-          button: {
-            no: 'No',
-            yes: 'Si'
-          },
-          callback: confirm => {
-            if (confirm) {
-              axios
-                .post(process.env.API_URL + 'eliminar-noticia', { id_noticia: id })
-                .then((response) => window.location.reload())
-                .catch(err => console.log(err))
-            }
-          }
-        }
-      )
+  import axios from "axios";
+  export default {
+    name: "noticias",
+    data() {
+      return {
+        items: [],
+        currentTutorial: null,
+        currentIndex: -1,
+        searchTitle: "",
+        page: 1,
+        count: 0,
+        pageSize: 100,
+        pageSizes: [20, 50, 100],
+        token: null,
+        API_URL: import.meta.env.VITE_API_URL,
+        token: localStorage.getItem("token"),
+      };
     },
-    cambiarEstadoNoticia: function (id, accion, event) {
-      var mensaje = ''
-      if (accion === 1) {
-        mensaje = '¿Desea activar la noticia?'
-      } else {
-        mensaje = '¿Desea desactivar la noticia?'
-      }
-      this.$confirm(
-        {
+    methods: {
+      eliminarNoticia: function (id) {
+        if (confirm("¿Está seguro(a) de eliminar el registro?") == true) {
+          let dataJson = {
+            id_noticia: id,
+          };
+
+          axios({
+            method: "post",
+            url: this.API_URL + "eliminar-noticia",
+            data: dataJson,
+            headers: {
+              // "Content-Type": "multipart/form-data",
+              "Access-Control-Allow-Headers": "x-access-token",
+              "x-access-token": this.token,
+            },
+          })
+            .then((response) => window.location.reload())
+            .catch((err) => console.log(err));
+        }
+
+        // this.$confirm({
+        //   message: "¿Está seguro(a) de eliminar el registro?",
+        //   button: {
+        //     no: "No",
+        //     yes: "Si",
+        //   },
+        //   callback: (confirm) => {
+        //     if (confirm) {
+        //       axios
+        //         .post(import.meta.env.VITE_API_URL + "eliminar-noticia", {id_noticia: id})
+        //         .then((response) => window.location.reload())
+        //         .catch((err) => console.log(err));
+        //     }
+        //   },
+        // });
+      },
+      cambiarEstadoNoticia: function (id, accion, event) {
+        var mensaje = "";
+        if (accion === 1) {
+          mensaje = "¿Desea activar la noticia?";
+        } else {
+          mensaje = "¿Desea desactivar la noticia?";
+        }
+        this.$confirm({
           message: mensaje,
           button: {
-            no: 'No',
-            yes: 'Si'
+            no: "No",
+            yes: "Si",
           },
-          callback: confirm => {
+          callback: (confirm) => {
             if (confirm) {
               axios
-                .post(process.env.API_URL + 'cambiar-estado-noticia', { id_noticia: id, accion: accion })
+                .post(import.meta.env.VITE_API_URL + "cambiar-estado-noticia", {id_noticia: id, accion: accion})
                 .then((response) => window.location.reload())
-                .catch(err => console.log(err))
+                .catch((err) => console.log(err));
             }
-          }
-        }
-      )
-    },
-    obtenerNoticias () {
-      var clase = this
-      var params = {
-        pagina: this.page,
-        cantidad: this.pageSize
-      }
-      axios
-        .post(process.env.API_URL + 'listar-noticias', params)
-        .then((response) => {
-          const { noticias, totalItems } = response.data
-          this.items = noticias
-          this.count = totalItems
-          console.log(response.data)
+          },
+        });
+      },
+      obtenerNoticias() {
+        var clase = this;
+        var params = {
+          pagina: this.page,
+          cantidad: this.pageSize,
+        };
+        axios({
+          method: "post",
+          url: import.meta.env.VITE_API_URL + "listar-noticias",
+          data: params,
+          headers: {
+            "Access-Control-Allow-Headers": "x-access-token",
+            "x-access-token": this.token,
+          },
         })
-        .catch(function (error) {
-          if (error.response && error.response.status === 401) {
-            clase.$store.dispatch('logout')
-            clase.$router.push('/login')
-          } else {
-            // Handle error however you want
-          }
-        })
-    },
+          .then((response) => {
+            const {noticias, totalItems} = response.data;
+            this.items = noticias;
+            this.count = totalItems;
 
-    handlePageChange (value) {
-      this.page = value
-      this.obtenerNoticias()
+            console.log(`this.items`, this.items);
+          })
+          .catch(function (error) {
+            if (error.response && error.response.status === 401) {
+              clase.$store.dispatch("logout");
+              clase.$router.push("/login");
+            } else {
+            }
+          });
+      },
+      handlePageChange(value) {
+        this.page = value;
+        this.obtenerNoticias();
+      },
+      handlePageSizeChange(event) {
+        this.pageSize = event.target.value;
+        this.page = 1;
+        this.obtenerNoticias();
+      },
+      getToken() {
+        this.token = localStorage.getItem("token");
+      },
+      newType(index) {
+        const typeList = ["Noticia", "Talento y Cultura", "Sostenibilidad", "Comunicados Corporativos"];
+        console.log(`typeList[index]`, typeList[index]);
+        return typeList[index];
+      },
     },
-
-    handlePageSizeChange (event) {
-      this.pageSize = event.target.value
-      this.page = 1
-      this.obtenerNoticias()
-    }
-  },
-  mounted () {
-    this.obtenerNoticias()
-  }
-}
+    mounted() {
+      this.getToken();
+      this.obtenerNoticias();
+    },
+  };
 </script>
 
-<style scoped lang="scss">
-.icon-div {
-    display: inline-block;
-}
-.icon-div i {
-    display: inline-block;
-    font-size: 20px;
-    width: 40px;
-    text-align: left;
-    color: #2196f3;
-}
-.cursor-pointer{
-  cursor: pointer;
-}
-.badge{
-  font-size:17px !important;
-  font-weight: normal !important;
-}
+<style scoped lang="postcss">
+  .btn {
+    &--action {
+      @apply inline-block mx-2 text-2xl cursor-pointer text-indigo-600 hover:text-indigo-900;
+    }
+  }
+
+  .check-active {
+    @apply text-2xl text-green-800;
+  }
+
+  .tag {
+    @apply text-xs inline-block py-1 px-2.5 leading-none text-center whitespace-nowrap align-baseline font-bold bg-blue-600 text-white rounded;
+  }
 </style>

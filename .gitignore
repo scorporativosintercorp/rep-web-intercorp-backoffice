@@ -15,4 +15,6 @@ selenium-debug.log
 *.njsproj
 *.sln
 
-# config/*
+# .env
+
+config/*
