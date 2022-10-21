@@ -8,6 +8,6 @@ module.exports = {
   ARCHIVOS_URL: '"https://modobetastorage.blob.core.windows.net/archivos/"',
   SSO_APPID: '"1023"',
   SSO_URL: '"https://sso.somosintercorp.net/"',
-  SSO_RETURN_URL: '"https://zzzzzzzzzzzzzzlively-sand-0fd19270f.azurestaticapps.net/%23/sso/acceso"',
+  SSO_RETURN_URL: '"https://lively-sand-0fd19270f.azurestaticapps.net/%23/sso/acceso"',
   SSO_TOKEN: '"MzI3OUY0QTktN0Q1NC00RjhDLUE5QUYtQjA1RUE2OTI1OTYz"'
 }
