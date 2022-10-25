@@ -11,6 +11,7 @@ import Noticias from "./views/noticias/index.vue";
 import UIElements from "./views/UIElements.vue";
 import Acceso from "./views/Acceso.vue";
 import Login from "./views/login.vue";
+import Logout from "./views/logout.vue";
 import NotFound from "./views/NotFound.vue";
 
 const routes = [
@@ -90,6 +91,15 @@ const routes = [
     path: "/login",
     name: "Login",
     component: Login,
+    meta: {
+      layout: "empty",
+      requiresAuth: false,
+    },
+  },
+  {
+    path: "/logout",
+    name: "Logout",
+    component: Logout,
     meta: {
       layout: "empty",
       requiresAuth: false,

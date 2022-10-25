@@ -1,8 +1,6 @@
 <template>
   <div class="flex">
-    <!-- Backdrop -->
     <div :class="isOpen ? 'block' : 'hidden'" @click="isOpen = false" class="fixed inset-0 z-20 transition-opacity bg-black opacity-50 lg:hidden"></div>
-    <!-- End Backdrop -->
 
     <div :class="isOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'" class="fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto transition duration-300 transform bg-gray-900 lg:translate-x-0 lg:sticky lg:inset-0 lg:h-screen">
       <div class="flex items-center justify-center mt-8">
@@ -39,7 +37,7 @@
           <span class="mx-4"><i class="fa fa-chart-pie"></i> Información Financiera</span>
         </router-link>
 
-        <router-link class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4" :class="[$route.name === 'Blank' ? activeClass : inactiveClass]" to="/blank">
+        <router-link class="flex items-center px-6 py-2 mt-4 duration-200 border-l-4" :class="[$route.name === 'Blank' ? activeClass : inactiveClass]" to="/logout">
           <span class="mx-4"><i class="fa fa-sign-out-alt"></i> Salir</span>
         </router-link>
       </nav>

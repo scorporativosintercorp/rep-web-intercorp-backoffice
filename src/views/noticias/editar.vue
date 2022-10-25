@@ -1,9 +1,9 @@
 <template>
   <div class="form--main">
     <form v-if="!sent" enctype="multipart/form-data" @submit.prevent="register(activo)">
-      <h3 class="mb-4 text-2xl font-bold">Editar noticia</h3>
+      <h3 class="mb-4 text-2xl font-bold" id="mainTitle">Editar noticia</h3>
 
-      <p class="mb-4 text-red-700 font-bold">
+      <p class="mb-4 font-bold text-red-700">
         <span v-if="cur_lang === 'es'">Datos en español:</span>
         <span v-else-if="cur_lang === 'en'">Datos en inglés:</span>
       </p>
@@ -26,6 +26,7 @@
             <div v-if="cur_lang === 'es'">
               <label class="sr-only" for="titulo">Añadir título</label>
               <input class="w-full text-xl border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500" type="text" id="titulo" placeholder="Añadir título" v-model="titulo" />
+              <div v-if="tituloError" class="label-error">{{ tituloError }}</div>
             </div>
 
             <div v-else-if="cur_lang === 'en'">
@@ -36,6 +37,7 @@
             <div v-if="cur_lang === 'es'">
               <label class="text-gray-700 sr-only" for="bajada_nota">Añadir bajada</label>
               <textarea class="w-full border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500" rows="3" id="bajada_nota" placeholder="Teclea para ingresar la bajada de la nota" v-model="bajada_nota"></textarea>
+              <div v-if="bajadaNotaError" class="label-error">{{ bajadaNotaError }}</div>
             </div>
 
             <div v-if="cur_lang === 'en'">
@@ -63,6 +65,7 @@
                   images_upload_handler: uploadImagenRichText,
                 }"
               />
+              <div v-if="textoError" class="label-error">{{ textoError }}</div>
             </div>
 
             <div v-if="cur_lang === 'en'">
@@ -102,6 +105,7 @@
                 </div>
                 <div class="p-6">
                   <input type="file" id="link_imagen_cabecera" v-on:change="subirImagen($event, 'link_imagen_cabecera', 'preview_image_header_url')" class="form-control" placeholder="Imagen de la cabecera" />
+                  <div v-if="imagenCabeceraError" class="label-error">{{ imagenCabeceraError }}</div>
                 </div>
               </div>
 
@@ -139,6 +143,7 @@
                 </div>
                 <div class="p-6">
                   <input type="file" id="link_imagen_preview" v-on:change="subirImagen($event, 'link_imagen_preview', 'preview_image_preview_url')" class="form-control" placeholder="Imagen Preview" />
+                  <div v-if="imagenPreviaError" class="label-error">{{ imagenPreviaError }}</div>
                 </div>
               </div>
 
@@ -157,7 +162,7 @@
                   <h3 class="text-sm font-semibold">Visualización de imagen</h3>
                   <span class="text-sm">Tipo de imagen: Previa</span>
                 </div>
-                <div class="p-6 flex flex-col items-center">
+                <div class="flex flex-col items-center p-6">
                   <figure v-if="cur_lang === 'es'">
                     <img :src="preview_image_preview_url" width="400" v-if="preview_image_preview_url" alt="Imagen previa de la cabecera" />
                   </figure>
@@ -171,7 +176,7 @@
         </div>
       </div>
 
-      <p class="mb-4 text-red-700 font-bold">Datos compartidos entre español e inglés:</p>
+      <p class="mb-4 font-bold text-red-700">Datos compartidos entre español e inglés:</p>
 
       <div class="mb-10">
         <div class="p-6 bg-white rounded-md shadow">
@@ -215,7 +220,7 @@
                 <div class="p-6">
                   <div class="flex justify-center">
                     <figure>
-                      <img :src="preview_image_author_url" v-if="preview_image_author_url" width="80" alt="Imagen previa de la cabecera" />
+                      <img :src="preview_image_author_url" v-if="preview_image_author_url" width="80" alt="Imagen del autor" />
                     </figure>
                   </div>
                 </div>
@@ -224,7 +229,7 @@
           </div>
 
           <div class="pb-4 border-b border-gray-100 mb-7">
-            <h2 class="text-lg font-semibold mb-3">Cita</h2>
+            <h2 class="mb-3 text-lg font-semibold">Cita</h2>
             <p class="text-sm">Copiar y pegar este texto: <strong>###quote###</strong> en el cuerpo de la noticia donde se quiera mostrar esta cita</p>
           </div>
 
@@ -312,7 +317,7 @@
           </div>
 
           <div class="mb-7">
-            <h2 class="text-lg font-semibold mb-3">Galería de imágenes</h2>
+            <h2 class="mb-3 text-lg font-semibold">Galería de imágenes</h2>
             <p class="text-sm">Tamaño de la imagen: 420px x 420px a 72ppp.</p>
             <p class="text-sm">Copiar y pegar este texto: <strong>###gallery###</strong> en el cuerpo de la noticia donde se quiera mostrar la galería de imágenes.</p>
           </div>
@@ -324,7 +329,7 @@
               </div>
               <div class="p-6">
                 <div>
-                  <div v-on:click="toggleModale" class="gallery-images--add cursor-pointer">Agregar imagen a la galería</div>
+                  <div v-on:click="toggleModale" class="cursor-pointer gallery-images--add">Agregar imagen a la galería</div>
                 </div>
               </div>
             </div>
@@ -406,7 +411,7 @@
         </div>
       </div>
 
-      <p class="mb-4 text-red-700 font-bold">Elige la ubicación del texto dentro de la web:</p>
+      <p class="mb-4 font-bold text-red-700">Elige la ubicación del texto dentro de la web:</p>
 
       <div class="mb-10">
         <div class="p-6 bg-[#F4F8FD] rounded-md shadow">
@@ -463,7 +468,7 @@
         </div>
       </div>
 
-      <p class="mb-4 text-red-700 font-bold">Estado de la noticia:</p>
+      <p class="mb-4 font-bold text-red-700">Estado de la noticia:</p>
 
       <div class="mb-10">
         <div class="p-6 bg-[#F4F8FD] rounded-md shadow">
@@ -524,7 +529,7 @@
           <button type="button" @click="toggleModale" class="btn btn-red">Cancelar</button>
           <button type="button" @click="addItemGaleria" :disabled="isDisabled" class="btn btn-blue">Agregar</button>
         </div>
-        <div class="modale--loading loading hidden" id="modaleLoading"></div>
+        <div class="hidden modale--loading loading" id="modaleLoading"></div>
       </div>
     </div>
   </div>
@@ -600,6 +605,14 @@
         slug: "",
         sent: false,
         loading: false,
+
+        // Errores
+        errors: false,
+        tituloError: "",
+        bajadaNotaError: "",
+        textoError: "",
+        imagenCabeceraError: "",
+        imagenPreviaError: "",
       };
     },
     mounted() {
@@ -630,7 +643,6 @@
           "x-access-token": this.token,
         },
       }).then((response) => {
-        console.log(`RESPONSE`, response.data);
         this.titulo = response.data.titulo;
         this.texto = response.data.texto;
         this.bajada_nota = response.data.bajada_nota;
@@ -661,8 +673,6 @@
         this.galleryList = response.data.galeria;
 
         this.galleryList.forEach((item) => {
-          console.log(`LIAST`, item);
-
           let newImage = {
             legend: item.legenda,
             url: this.VITE_IMAGES_URL + item.link_imagen,
@@ -697,6 +707,97 @@
       });
     },
     methods: {
+      register(status = this.activo, redirect = 0) {
+        this.errors = [];
+
+        let dataJson = {
+          id_noticia: this.idnew,
+          titulo: this.titulo,
+          titulo_en: this.titulo_en,
+          texto: this.texto,
+          texto_en: this.texto_en,
+          bajada_nota: this.bajada_nota,
+          bajada_nota_en: this.bajada_nota_en,
+          tipo_plantilla: this.tipo_plantilla,
+          color_principal: this.color_principal,
+          link_imagen_cabecera: this.link_imagen_cabecera,
+          link_imagen_cabecera_en: this.ink_imagen_cabecera_en,
+          link_imagen_preview: this.link_imagen_preview,
+          link_imagen_preview_en: this.link_imagen_preview_en,
+          palabras_clave: this.palabras_clave,
+          palabras_clave_en: this.palabras_clave_en,
+          autor_nombre: this.autor_nombre,
+          autor_cargo: this.autor_cargo,
+          autor_imagen: this.autor_imagen,
+          cita_autor: this.cita_autor,
+          cita_cargo: this.cita_cargo,
+          cita_imagen: this.cita_imagen,
+          cita_parrafo_principal: this.cita_parrafo_principal,
+          cita_parrafo_secundario: this.cita_parrafo_secundario,
+          tiempo_de_lectura: this.tiempo_de_lectura,
+          seo_meta_title: this.seo_meta_title,
+          seo_meta_description: this.seo_meta_description,
+          seo_meta_keywords: this.seo_meta_keywords,
+          destacado: this.destacado,
+          tipo_noticia: this.tipo_noticia,
+          flag_home: this.flag_home,
+          activo: status,
+        };
+
+        this.tituloError = this.titulo.length > 1 ? "" : "Este campo es obligatorio";
+        this.bajadaNotaError = this.bajada_nota.length > 1 ? "" : "Este campo es obligatorio";
+        this.textoError = this.texto.length > 1 ? "" : "Este campo es obligatorio";
+        this.imagenCabeceraError = this.link_imagen_cabecera.length > 1 ? "" : "Este campo es obligatorio";
+        this.imagenPreviaError = this.link_imagen_preview.length > 1 ? "" : "Este campo es obligatorio";
+
+        let flag = !(this.tituloError || this.bajadaNotaError || this.textoError || this.imagenCabeceraError || this.imagenPreviaError);
+
+        if (flag) {
+          this.loading = true;
+
+          axios({
+            method: "put",
+            url: this.API_URL + "noticia",
+            data: dataJson,
+            headers: {
+              "Access-Control-Allow-Headers": "x-access-token",
+              "x-access-token": this.token,
+            },
+          })
+            .then((response) => {
+              if (redirect === 1) {
+                axios({
+                  method: "post",
+                  url: this.API_URL + "detalle-noticia-back",
+                  data: dataJson,
+                  headers: {
+                    "Access-Control-Allow-Headers": "x-access-token",
+                    "x-access-token": this.token,
+                  },
+                }).then((response) => {
+                  this.activo = 0;
+                  window.open(this.PREVIEW_URL + response.data.slug);
+                  this.loading = false;
+                });
+              } else {
+                setTimeout(() => {
+                  this.loading = false;
+                  this.sent = true;
+                }, 1000);
+              }
+            })
+            .catch((err) => console.log(err));
+        } else {
+          this.errors = true;
+
+          setTimeout(function () {
+            const el = document.getElementById("mainTitle");
+            if (el) {
+              el.scrollIntoView({behavior: "smooth", block: "center"});
+            }
+          }, 200);
+        }
+      },
       addItemGaleria() {
         const loading = document.getElementById("modaleLoading");
         const image = document.getElementById("imageGallery");
@@ -734,7 +835,6 @@
                 legend: legend.value,
                 url: response.data.url + response.data.imagen,
                 id: response.data.data_imagen.id,
-                // id: response.data.id,
               };
 
               this.galeria.push(newImage);
@@ -746,77 +846,6 @@
             }, 1000);
           });
         }
-      },
-      register(status = this.activo, redirect = 0) {
-        this.errors = [];
-        this.loading = true;
-
-        let dataJson = {
-          id_noticia: this.idnew,
-          titulo: this.titulo,
-          titulo_en: this.titulo_en,
-          texto: this.texto,
-          texto_en: this.texto_en,
-          bajada_nota: this.bajada_nota,
-          bajada_nota_en: this.bajada_nota_en,
-          tipo_plantilla: this.tipo_plantilla,
-          color_principal: this.color_principal,
-          link_imagen_cabecera: this.link_imagen_cabecera,
-          link_imagen_cabecera_en: this.ink_imagen_cabecera_en,
-          link_imagen_preview: this.link_imagen_preview,
-          link_imagen_preview_en: this.link_imagen_preview_en,
-          palabras_clave: this.palabras_clave,
-          palabras_clave_en: this.palabras_clave_en,
-          autor_nombre: this.autor_nombre,
-          autor_cargo: this.autor_cargo,
-          autor_imagen: this.autor_imagen,
-          cita_autor: this.cita_autor,
-          cita_cargo: this.cita_cargo,
-          cita_imagen: this.cita_imagen,
-          cita_parrafo_principal: this.cita_parrafo_principal,
-          cita_parrafo_secundario: this.cita_parrafo_secundario,
-          tiempo_de_lectura: this.tiempo_de_lectura,
-          seo_meta_title: this.seo_meta_title,
-          seo_meta_description: this.seo_meta_description,
-          seo_meta_keywords: this.seo_meta_keywords,
-          destacado: this.destacado,
-          tipo_noticia: this.tipo_noticia,
-          flag_home: this.flag_home,
-          activo: status,
-        };
-
-        axios({
-          method: "put",
-          url: this.API_URL + "noticia",
-          data: dataJson,
-          headers: {
-            "Access-Control-Allow-Headers": "x-access-token",
-            "x-access-token": this.token,
-          },
-        })
-          .then((response) => {
-            if (redirect === 1) {
-              axios({
-                method: "post",
-                url: this.API_URL + "detalle-noticia-back",
-                data: dataJson,
-                headers: {
-                  "Access-Control-Allow-Headers": "x-access-token",
-                  "x-access-token": this.token,
-                },
-              }).then((response) => {
-                this.activo = 0;
-                window.open(this.PREVIEW_URL + response.data.slug);
-                this.loading = false;
-              });
-            } else {
-              setTimeout(() => {
-                this.loading = false;
-                this.sent = true;
-              }, 1000);
-            }
-          })
-          .catch((err) => console.log(err));
       },
       setNewsType(event) {
         const value = event.path[0].value;
@@ -877,9 +906,7 @@
               "x-access-token": this.token,
             },
           })
-            .then((response) => {
-              console.log(`Response imagen galería: `, response);
-            })
+            .then((response) => {})
             .catch((err) => console.log(err));
         });
       },
@@ -890,8 +917,6 @@
         xhr.withCredentials = false;
         xhr.open("POST", this.API_URL + "subirimagen-richtext");
         xhr.setRequestHeader("x-access-token", this.token);
-
-        console.log(`THIS.TOKEN`, this.token);
 
         xhr.upload.onprogress = function (e) {
           progress((e.loaded / e.total) * 100);
@@ -944,7 +969,6 @@
             "x-access-token": this.token,
           },
         }).then((response) => {
-          console.log(`response`, response);
           this.galeria.splice(index, 1);
         });
       },

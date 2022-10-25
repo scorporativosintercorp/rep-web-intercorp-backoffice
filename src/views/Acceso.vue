@@ -13,9 +13,7 @@
             </div>
           </div>
         </div>
-        <!-- content-wrapper ends -->
       </div>
-      <!-- page-body-wrapper ends -->
     </div>
   </section>
 </template>
@@ -35,7 +33,6 @@
       var store = this.$store;
       let ACK = atob(this.$route.query.ACK);
       var clase = this;
-      console.log("dqwdhqwdbiqwjb", clase);
       axios
         .get(import.meta.env.VITE_SSO_URL + "api/account/getAccesos?appID=" + import.meta.env.VITE_SSO_APPID + "&userID=" + ACK)
         .then((response) => {
@@ -43,7 +40,6 @@
           this.$store
             .dispatch("loginSSO", response.data)
             .then((responsex) => {
-              console.log(responsex);
               router.push("/");
             })
             .catch(function (error) {

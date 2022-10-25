@@ -137,6 +137,12 @@ textarea {
 }
 
 .loading {
-  @apply absolute inset-0 bg-no-repeat bg-white bg-opacity-80 z-10 bg-center;
+  @apply absolute inset-0 bg-no-repeat bg-white bg-opacity-90 z-10 bg-center;
   background-image: url("../../img/animation.png");
+}
+
+.label {
+  &-error {
+    @apply text-sm text-red-600 font-semibold;
+  }
 }

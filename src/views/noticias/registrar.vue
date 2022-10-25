@@ -1,9 +1,14 @@
 <template>
   <div class="form--main">
     <form v-if="!sent" enctype="multipart/form-data" @submit.prevent="register(activo)">
-      <h3 class="mb-4 text-2xl font-bold">Crear nueva noticia</h3>
+      <h3 class="mb-4 text-2xl font-bold" id="mainTitle">Crear nueva noticia</h3>
 
-      <p class="mb-4 text-red-700 font-bold">
+      <div v-if="errors" class="flex p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+        <svg class="inline w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+        <div>Por favor complete los campos requeridos</div>
+      </div>
+
+      <p class="mb-4 text-lg font-bold text-blue-700">
         <span v-if="cur_lang === 'es'">Datos en español:</span>
         <span v-else-if="cur_lang === 'en'">Datos en inglés:</span>
       </p>
@@ -11,10 +16,10 @@
       <div class="mb-10">
         <div class="p-6 bg-white rounded-md shadow">
           <div class="flex justify-between pb-4 border-b border-gray-100 mb-7">
-            <h2 class="text-lg font-semibold mb-4">Datos principales:</h2>
+            <h2 class="mb-4 text-lg font-semibold">Datos principales:</h2>
 
             <div class="flex items-center">
-              <span class="inline-block mr-2">Selecciona un idioma: </span>
+              <span class="inline-block mr-2">Selecciona un idioma:</span>
               <select name="lang" class="py-1 pl-1 pr-8 leading-none border-none" @change="toggleLangs">
                 <option value="es" selected>ES</option>
                 <option value="en">EN</option>
@@ -26,6 +31,7 @@
             <div v-if="cur_lang === 'es'">
               <label class="sr-only" for="titulo">Añadir título</label>
               <input class="w-full text-xl border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500" type="text" id="titulo" placeholder="Añadir título" v-model="titulo" />
+              <div v-if="tituloError" class="label-error">{{ tituloError }}</div>
             </div>
 
             <div v-else-if="cur_lang === 'en'">
@@ -36,6 +42,7 @@
             <div v-if="cur_lang === 'es'">
               <label class="text-gray-700 sr-only" for="bajada_nota">Añadir bajada</label>
               <textarea class="w-full border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500" rows="3" id="bajada_nota" placeholder="Teclea para ingresar la bajada de la nota" v-model="bajada_nota"></textarea>
+              <div v-if="bajadaNotaError" class="label-error">{{ bajadaNotaError }}</div>
             </div>
 
             <div v-if="cur_lang === 'en'">
@@ -63,6 +70,7 @@
                   images_upload_handler: uploadImagenRichText,
                 }"
               />
+              <div v-if="textoError" class="label-error">{{ textoError }}</div>
             </div>
 
             <div v-if="cur_lang === 'en'">
@@ -102,6 +110,7 @@
                 </div>
                 <div class="p-6">
                   <input type="file" id="link_imagen_cabecera" v-on:change="subirImagen($event, 'link_imagen_cabecera', 'preview_image_header_url')" class="form-control" placeholder="Imagen de la cabecera" />
+                  <div v-if="imagenCabeceraError" class="label-error">{{ imagenCabeceraError }}</div>
                 </div>
               </div>
 
@@ -139,6 +148,7 @@
                 </div>
                 <div class="p-6">
                   <input type="file" id="link_imagen_preview" v-on:change="subirImagen($event, 'link_imagen_preview', 'preview_image_preview_url')" class="form-control" placeholder="Imagen Preview" />
+                  <div v-if="imagenPreviaError" class="label-error">{{ imagenPreviaError }}</div>
                 </div>
               </div>
 
@@ -157,7 +167,7 @@
                   <h3 class="text-sm font-semibold">Visualización de imagen</h3>
                   <span class="text-sm">Tipo de imagen: Previa</span>
                 </div>
-                <div class="p-6 flex flex-col items-center">
+                <div class="flex flex-col items-center p-6">
                   <figure v-if="cur_lang === 'es'">
                     <img :src="preview_image_preview_url" v-if="preview_image_preview_url" alt="Imagen previa de la cabecera" width="400" />
                   </figure>
@@ -171,7 +181,7 @@
         </div>
       </div>
 
-      <p class="mb-4 text-red-700 font-bold">Datos compartidos entre español e inglés:</p>
+      <p class="mb-4 text-lg font-bold text-blue-700">Datos compartidos entre español e inglés:</p>
 
       <div class="mb-10">
         <div class="p-6 bg-white rounded-md shadow">
@@ -224,7 +234,7 @@
           </div>
 
           <div class="pb-4 border-b border-gray-100 mb-7">
-            <h2 class="text-lg font-semibold mb-3">Cita</h2>
+            <h2 class="mb-3 text-lg font-semibold">Cita</h2>
             <p class="text-sm">Copiar y pegar este texto: <strong>###quote###</strong> en el cuerpo de la noticia donde se quiera mostrar esta cita</p>
           </div>
 
@@ -323,7 +333,7 @@
               </div>
               <div class="p-6">
                 <div>
-                  <div v-on:click="toggleModale" class="gallery-images--add cursor-pointer">Agregar imagen a la galería</div>
+                  <div v-on:click="toggleModale" class="cursor-pointer gallery-images--add">Agregar imagen a la galería</div>
                 </div>
               </div>
             </div>
@@ -405,7 +415,7 @@
         </div>
       </div>
 
-      <p class="mb-4 text-red-700 font-bold">Elige la ubicación del texto dentro de la web:</p>
+      <p class="mb-4 text-lg font-bold text-blue-700">Elige la ubicación del texto dentro de la web:</p>
 
       <div class="mb-10">
         <div class="p-6 bg-[#F4F8FD] rounded-md shadow">
@@ -462,7 +472,7 @@
         </div>
       </div>
 
-      <p class="mb-4 text-red-700 font-bold">Estado de la noticia:</p>
+      <p class="mb-4 text-lg font-bold text-blue-700">Estado de la noticia:</p>
 
       <div class="mb-10">
         <div class="p-6 bg-[#F4F8FD] rounded-md shadow">
@@ -523,7 +533,7 @@
           <button type="button" @click="toggleModale" class="btn btn-red">Cancelar</button>
           <button type="button" @click="addItemGaleria" :disabled="isDisabled" class="btn btn-blue">Agregar</button>
         </div>
-        <div class="modale--loading loading hidden" id="modaleLoading"></div>
+        <div class="hidden modale--loading loading" id="modaleLoading"></div>
       </div>
     </div>
   </div>
@@ -544,6 +554,7 @@
       return {
         revele: false,
         isDisabled: false,
+        isValid: 0,
 
         cur_lang: "es",
         API_URL: import.meta.env.VITE_API_URL,
@@ -590,7 +601,6 @@
         tipo_noticia: "",
         flag_home: "",
         id_usuario: "",
-        errors: [],
         galeria: [],
         galeriaLegenda: [],
         activo: 1,
@@ -598,6 +608,14 @@
         archivoen: "",
         sent: false,
         loading: false,
+
+        // Errores
+        errors: false,
+        tituloError: "",
+        bajadaNotaError: "",
+        textoError: "",
+        imagenCabeceraError: "",
+        imagenPreviaError: "",
       };
     },
     mounted() {
@@ -613,43 +631,8 @@
     },
     setup() {},
     methods: {
-      addItemGaleria() {
-        const loading = document.getElementById("modaleLoading");
-        const image = document.getElementById("imageGallery");
-        const legend = document.getElementById("legend");
-        var imageUrl = "";
-
-        loading.classList.remove("hidden");
-
-        if (image.files[0]) {
-          const fileReader = new FileReader();
-          fileReader.readAsDataURL(image.files[0]);
-          fileReader.addEventListener("load", function (el) {
-            imageUrl = el.target.result;
-          });
-        }
-
-        setTimeout(() => {
-          let newImage = {
-            image: image.files[0],
-            legend: legend.value,
-            url: imageUrl,
-          };
-
-          this.galeria.push(newImage);
-
-          this.revele = false;
-          image.value = "";
-          legend.value = "";
-          loading.classList.add("hidden");
-        }, 1000);
-      },
-      removeItemGaleria(index) {
-        this.galeria.splice(index, 1);
-      },
       register(status = this.activo, redirect = 0) {
-        this.errors = [];
-        this.loading = true;
+        var router = this.$router;
 
         let dataJson = {
           titulo: this.titulo,
@@ -685,34 +668,92 @@
           activo: status,
         };
 
-        axios({
-          method: "post",
-          url: this.API_URL + "noticia",
-          data: dataJson,
-          headers: {
-            "Content-Type": "multipart/form-data",
-            "Access-Control-Allow-Headers": "x-access-token",
-            "x-access-token": this.token,
-          },
-        })
-          .then((response) => {
-            let idNoticia = response.data.id;
+        this.tituloError = this.titulo.length > 1 ? "" : "Este campo es obligatorio";
+        this.bajadaNotaError = this.bajada_nota.length > 1 ? "" : "Este campo es obligatorio";
+        this.textoError = this.texto.length > 1 ? "" : "Este campo es obligatorio";
+        this.imagenCabeceraError = this.link_imagen_cabecera.length > 1 ? "" : "Este campo es obligatorio";
+        this.imagenPreviaError = this.link_imagen_preview.length > 1 ? "" : "Este campo es obligatorio";
 
-            this.subirGaleria(idNoticia);
+        let flag = !(this.tituloError || this.bajadaNotaError || this.textoError || this.imagenCabeceraError || this.imagenPreviaError);
 
-            if (redirect === 1) {
-              let slug = response.data.slug;
-              this.activo = 0;
-              window.open(this.PREVIEW_URL + slug);
-              this.loading = false;
-            } else {
-              setTimeout(() => {
-                this.loading = false;
-                this.sent = true;
-              }, 1000);
-            }
+        if (flag) {
+          this.loading = true;
+
+          axios({
+            method: "post",
+            url: this.API_URL + "noticia",
+            data: dataJson,
+            headers: {
+              "Content-Type": "multipart/form-data",
+              "Access-Control-Allow-Headers": "x-access-token",
+              "x-access-token": this.token,
+            },
           })
-          .catch((err) => console.log(err));
+            .then((response) => {
+              let idNoticia = response.data.id;
+
+              this.subirGaleria(idNoticia);
+
+              if (redirect === 1) {
+                let slug = response.data.slug;
+                this.activo = 0;
+
+                window.open(this.PREVIEW_URL + slug);
+
+                router.push({path: `/editar-noticia/idnew/${idNoticia}`});
+                this.loading = false;
+              } else {
+                setTimeout(() => {
+                  this.loading = false;
+                  this.sent = true;
+                }, 1000);
+              }
+            })
+            .catch((err) => console.log(err));
+        } else {
+          this.errors = true;
+
+          setTimeout(function () {
+            const el = document.getElementById("mainTitle");
+            if (el) {
+              el.scrollIntoView({behavior: "smooth", block: "center"});
+            }
+          }, 200);
+        }
+      },
+      addItemGaleria() {
+        const loading = document.getElementById("modaleLoading");
+        const image = document.getElementById("imageGallery");
+        const legend = document.getElementById("legend");
+        var imageUrl = "";
+
+        loading.classList.remove("hidden");
+
+        if (image.files[0]) {
+          const fileReader = new FileReader();
+          fileReader.readAsDataURL(image.files[0]);
+          fileReader.addEventListener("load", function (el) {
+            imageUrl = el.target.result;
+          });
+        }
+
+        setTimeout(() => {
+          let newImage = {
+            image: image.files[0],
+            legend: legend.value,
+            url: imageUrl,
+          };
+
+          this.galeria.push(newImage);
+
+          this.revele = false;
+          image.value = "";
+          legend.value = "";
+          loading.classList.add("hidden");
+        }, 1000);
+      },
+      removeItemGaleria(index) {
+        this.galeria.splice(index, 1);
       },
       setNewsType(event) {
         const value = event.path[0].value;

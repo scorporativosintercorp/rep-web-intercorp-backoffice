@@ -1,6 +1,5 @@
 <template>
   <div class="flex bg-gray-200 font-roboto">
-    <vue-confirm-dialog></vue-confirm-dialog>
     <Sidebar />
 
     <div class="flex-1 flex flex-col overflow-hidden">
